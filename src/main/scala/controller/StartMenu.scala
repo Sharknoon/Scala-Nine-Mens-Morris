@@ -3,21 +3,17 @@ package controller
 import model._
 
 
-class StartMenu(players : (String, String)) {
+class StartMenu(playerNames: (String, String)) {
 
   startNewGame()
 
-  def startNewGame() : Playground = {
+  def startNewGame(): Game = {
+    val player1 = Player(name = playerNames._1, color = Color.WHITE)
+    val player2 = Player(name = playerNames._2, color = Color.BLACK)
 
-    val player1 = Player(players._1, List[Token](), Color.WHITE)
-    val player2 = Player(players._2, List[Token](), Color.BLACK)
+    val playground = Playground()
 
-    createTokens(player1)
-    createTokens(player2)
-
-    createPlayground()
+    Game((player1, player2), playground)
   }
 
-  def createTokens(player : Player): Unit = player.tokens = List.fill(GameConstants.AMOUNT_TOKENS)(Token(player))
-  def createPlayground() = Playground(List())
 }

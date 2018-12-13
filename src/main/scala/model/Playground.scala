@@ -1,3 +1,3 @@
 package model
 
-case class Playground(var playground: List[List[Option[Token]]])
+case class Playground(playground: List[List[Option[Token]]] = List.fill(3)(List.fill(8)(Option.empty)))
