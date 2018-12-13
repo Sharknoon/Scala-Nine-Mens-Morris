@@ -1,5 +1,8 @@
+import view.tui.Tui
+
 object Main {
     def main(args: Array[String]): Unit ={
-      println("Hello world")
+
+      val tui = new Tui()
     }
 }

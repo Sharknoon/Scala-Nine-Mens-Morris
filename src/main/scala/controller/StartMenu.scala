@@ -3,9 +3,11 @@ package controller
 import model._
 
 
-class StartMenu {
+class StartMenu(players : (String, String)) {
 
-  def startNewGame(players : (String, String)) : Playground = {
+  startNewGame()
+
+  def startNewGame() : Playground = {
 
     val player1 = Player(players._1, List[Token](), Color.WHITE)
     val player2 = Player(players._2, List[Token](), Color.BLACK)
