@@ -3,7 +3,7 @@ package controller
 import model._
 
 
-class StartMenu(playerNames: (String, String)) {
+class MenuController(playerNames: (String, String)) {
 
   startNewGame()
 

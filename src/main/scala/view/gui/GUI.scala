@@ -1,6 +1,6 @@
 package view.gui
 
-import controller.StartMenu
+import controller.MenuController
 import javafx.event.ActionEvent
 import model.StringConstants
 import scalafx.application.JFXApp
@@ -44,7 +44,7 @@ object GUI extends JFXApp {
 
     val button = new Button(StringConstants.START_GAME)
     button.onAction = (_: ActionEvent) => {
-      val startMenu = new StartMenu((textFieldPlayer1.getText(), textFieldPlayer2.getText))
+      val startMenu = new MenuController((textFieldPlayer1.getText(), textFieldPlayer2.getText))
       startMenu.startNewGame()
     }
 

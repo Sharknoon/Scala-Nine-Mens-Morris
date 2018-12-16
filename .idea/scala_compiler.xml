@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="sbt 1" modules="nine men's morris" />
+    <profile name="sbt 1" modules="Nine Men's Morris,nine men's morris" />
   </component>
 </project>

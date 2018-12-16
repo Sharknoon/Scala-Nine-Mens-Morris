@@ -1,6 +1,6 @@
 package view.tui
 
-import controller.StartMenu
+import controller.MenuController
 
 class Tui {
 
@@ -14,7 +14,7 @@ class Tui {
     println("Spieler 2:")
     val player2 = scala.io.StdIn.readLine()
 
-    val startMenuController = new StartMenu((player1, player2))
+    new MenuController((player1, player2))
   }
 
 
