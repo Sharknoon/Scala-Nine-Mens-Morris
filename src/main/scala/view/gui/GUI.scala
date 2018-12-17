@@ -139,7 +139,7 @@ object GUI extends JFXApp {
   }
 
   private def bindTokens(game: GameController, group: Group): Unit = {
-    game.getGame().playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
+    game.getGame.playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
       val tokenUI = new TokenUI()
       tuple._2.onChange((_, _, newToken) =>
         if (newToken == null) {

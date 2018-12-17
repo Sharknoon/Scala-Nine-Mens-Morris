@@ -5,6 +5,9 @@ import model._
 
 class MenuController(playerNames: (String, String)) {
 
+  /*
+   Create new game with the two player names and return the game controller
+   */
   def startNewGame(): GameController = {
     val player1 = Player(name = playerNames._1, color = Color.WHITE)
     val player2 = Player(name = playerNames._2, color = Color.BLACK)

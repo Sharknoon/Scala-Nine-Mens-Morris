@@ -1,7 +1,7 @@
 package view.tui
 
 import controller.{GameController, MenuController}
-import model.{Color, Game, Playground}
+import model.{Color, Game, Playground, StringConstants}
 
 class Tui {
 
@@ -9,26 +9,42 @@ class Tui {
 
   def getStartMenuInput(): Unit = {
 
-    // TODO auf leere Eingabe abfragen
-    println("Bitte Spielernamen eingeben, um ein neues Spiel zu starten. Bedenke dass der Spieler 1 immer die Farbe weis erhält und damit beginnt.")
-    println("Spieler 1:")
+    println(StringConstants.ASK_FOR_PLAYER_NAMES)
+    println(StringConstants.PLAYER1)
     val player1 = scala.io.StdIn.readLine()
-    println("Spieler 2:")
+    println(StringConstants.PLAYER2)
     val player2 = scala.io.StdIn.readLine()
 
+    // Empty names
+    if(player1.isEmpty || player2.isEmpty){
+      println(StringConstants.EMPTY_PLAYER_NAMES)
+      getStartMenuInput()
+      return
+    }
+
+    // Start new game
     val menuController = new MenuController((player1, player2))
     val gameController = menuController.startNewGame()
     changeTurn(gameController)
 
   }
 
+  /*
+    Starts new turn for the next player
+   */
   def changeTurn(gameController: GameController): Unit = {
 
-    val activePlayer = gameController.getActivePlayer()
-    println("Spieler " + activePlayer.name + " (" + activePlayer.color + ") ist an der Reihe:")
-    printPlayGroundLayout()
-    printCurrentPlayGround(gameController.getGame().playground)
+    val activePlayer = gameController.getActivePlayer
+    println(StringConstants.ACTIVE_PLAYER + activePlayer.name + " (" + activePlayer.color + ") " + StringConstants.ACTIVE_PLAYER_IS_ON_TURN)
 
+    // Print out the playground layout with the Ids of each field and
+    // the current playground with all set tokens
+    printPlayGroundLayout()
+    printCurrentPlayGround(gameController.getGame.playground)
+
+    // Check if active player has to set one of his 9 tokens
+    // If yes, he has to set a token
+    // If no, he has to move or jump (if allowed) with a token
     if(gameController.canSetTokens(activePlayer)){
       setToken(gameController)
     } else {
@@ -36,6 +52,9 @@ class Tui {
     }
   }
 
+  /*
+   Prints out the playground with all field Ids on the terminal
+   */
   def printPlayGroundLayout(): Unit = {
     println(
       "11--------12---------13\n" +
@@ -53,9 +72,12 @@ class Tui {
         "17--------16---------15")
   }
 
+  /*
+    Prints out the current playground with all set tokens of the players
+    B stands for all black tokens
+    W stands for all white tokens
+   */
   def printCurrentPlayGround(playground: Playground): Unit = {
-
-
     val oneOne = getFieldToken(playground, (1,1))
     val oneTwo = getFieldToken(playground, (1,2))
     val oneThree = getFieldToken(playground, (1,3))
@@ -97,11 +119,18 @@ class Tui {
         s"$oneSeven----------$oneSix----------$oneFive")
   }
 
+  /*
+    Gets the value of the field
+    B for a black token
+    W for a white token
+      . for a free field
+   */
   def getFieldToken(playground: Playground, field : (Int, Int)) : String = {
     val blackToken = "B"
     val whiteToken = "W"
     val noToken = "."
 
+    // Get the field value
     val fieldValue = playground.fields(field).get()
 
     if(fieldValue == null){
@@ -113,22 +142,44 @@ class Tui {
     }
   }
 
+  /*
+    Ask active player for setting a token
+   */
   def setToken(gameController: GameController) : Unit = {
-    // TODO Auf Int Eingabe abfragen
-    println("Wohin soll der neue Stein gesetzt werden?")
+    // Get input of the token position
+    println(StringConstants.SET_TOKEN)
     val positionInput = scala.io.StdIn.readLine()
+
+    // Check that all chars of the input string are numbers
+    if(!isAllDigits(positionInput)){
+      println(StringConstants.SET_TOKEN_NOT_NUMERIC)
+      setToken(gameController)
+      return
+    }
+
     val ring = positionInput.charAt(0)
     val field = positionInput.charAt(1)
     val position = (ring.toString.toInt, field.toString.toInt)
 
+    // check if the position is still free
     if (!gameController.isPositionFree(position)){
-       println("Position ist bereits durch einen anderen Spielstein besetzt!")
+       println(StringConstants.SET_TOKEN_NO_FREE_POSITION)
       setToken(gameController)
       return
     }
+
+    // Set token to position
     gameController.setToken(position)
   }
 
+  /*
+   Checks if a string contains always numbers
+   */
+  def isAllDigits(x: String): Boolean = x forall Character.isDigit
+
+  /*
+   Move token
+   */
   def moveToken(gameController: GameController): Unit = {
 
   }
