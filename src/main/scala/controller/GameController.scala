@@ -14,11 +14,11 @@ class GameController(game: Game) {
    activePlayer
   }
 
-  def getActivePlayer() : Player = {
+  def getActivePlayer: Player = {
     activePlayer
   }
 
-  def getGame() : Game = {
+  def getGame: Game = {
     game
   }
 
@@ -87,7 +87,7 @@ class GameController(game: Game) {
 
     }
 
-    return  false
+      false
 
 
   }
