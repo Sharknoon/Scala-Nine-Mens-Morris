@@ -1,6 +1,6 @@
 package view.gui
 
-import controller.MenuController
+import controller.{GameController, MenuController}
 import model.Color.Color
 import model.{Color, Game, StringConstants, Token}
 import scalafx.Includes._
@@ -56,7 +56,7 @@ object GUI extends JFXApp {
     }
   }
 
-  private def initPlayground(pane: BorderPane, game: Game): Unit = {
+  private def initPlayground(pane: BorderPane, game: GameController): Unit = {
     pane.children.clear()
     pane.center = createPlayground()
     pane.bottom = createPlaygroundLabel()
@@ -138,8 +138,8 @@ object GUI extends JFXApp {
     }
   }
 
-  private def bindTokens(game: Game, group: Group): Unit = {
-    game.playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
+  private def bindTokens(game: GameController, group: Group): Unit = {
+    game.getGame().playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
       val tokenUI = new TokenUI()
       tuple._2.onChange((_, _, newToken) =>
         if (newToken == null) {
