@@ -50,6 +50,8 @@ class TUI {
     } else {
       moveToken(gameController)
     }
+    gameController.changePlayer()
+    changeTurn(gameController)
   }
 
   /**
@@ -150,6 +152,13 @@ class TUI {
     println(StringConstants.SET_TOKEN)
     val positionInput = scala.io.StdIn.readLine()
 
+    // Position must contain 2 digits
+    if(positionInput.length < 2){
+      println(StringConstants.SET_TOKEN_WRONG_POSITION)
+      setToken(gameController)
+      return
+    }
+
     // Check that all chars of the input string are numbers
     if (!isAllDigits(positionInput)) {
       println(StringConstants.SET_TOKEN_NOT_NUMERIC)
@@ -160,6 +169,13 @@ class TUI {
     val ring = positionInput.charAt(0)
     val field = positionInput.charAt(1)
     val position = (ring.toString.toInt, field.toString.toInt)
+
+    // Wrong position
+    if(position._1 == 0 || position._1 > 3 || position._2 == 0 || position._2 > 8){
+      println(StringConstants.SET_TOKEN_WRONG_POSITION)
+      setToken(gameController)
+      return
+    }
 
     // check if the position is still free
     if (!gameController.isPositionFree(position)) {
