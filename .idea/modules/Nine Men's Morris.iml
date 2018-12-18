@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="scalagame [file:/C:/Users/pakem/IdeaProjects/ScalaGame/]" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+<module external.linked.project.id="scalagame [file:/C:/Users/Josua%20Frank/IdeaProjects/ScalaGame/]" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
     <output url="file://$MODULE_DIR$/../../target/scala-2.12/classes" />
     <output-test url="file://$MODULE_DIR$/../../target/scala-2.12/test-classes" />
@@ -16,6 +16,41 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.12.8:jar" level="project" />
     <orderEntry type="module-library">
+      <library name="sbt: unmanaged-jars">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../lib/scala-library-2.11.12-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-library-2.11.12-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-library-2.11.12.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-reflect-2.11.12-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-reflect-2.11.12-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-reflect-2.11.12.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-xml_2.11-1.0.6-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-xml_2.11-1.0.6-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scala-xml_2.11-1.0.6.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scalactic_2.11-3.0.5-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scalactic_2.11-3.0.5-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scalactic_2.11-3.0.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scalatest_2.11-3.0.5-javadoc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scalatest_2.11-3.0.5-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/scalatest_2.11-3.0.5.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" scope="TEST" name="sbt: org.scalatest:scalatest_2.12:3.0.5:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scalactic:scalactic_2.12:3.0.5:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="sbt: org.scala-lang.modules:scala-xml_2.12:1.0.6:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scalafx:scalafx_2.12:11-R16:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-reflect:2.12.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-base:11:win:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-controls:11:win:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-fxml:11:win:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-graphics:11:win:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-media:11:win:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-swing:11:win:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-web:11:win:jar" level="project" />
+    <orderEntry type="module-library">
       <library name="sbt: unmanaged-sources-and-docs">
         <CLASSES />
         <JAVADOC />
@@ -30,14 +65,5 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" name="sbt: org.openjfx:javafx-web:11:win:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.openjfx:javafx-swing:11:win:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.openjfx:javafx-media:11:win:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.openjfx:javafx-graphics:11:win:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.openjfx:javafx-fxml:11:win:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.openjfx:javafx-controls:11:win:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.openjfx:javafx-base:11:win:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.scala-lang:scala-reflect:2.12.8:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.scalafx:scalafx_2.12:11-R16:jar" level="project" />
   </component>
 </module>
