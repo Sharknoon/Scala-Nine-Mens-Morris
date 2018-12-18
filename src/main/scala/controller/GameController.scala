@@ -145,7 +145,6 @@ class GameController(game: Game) {
       }
 
     }
-
     false
   }
 

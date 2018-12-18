@@ -13,5 +13,7 @@ object StringConstants {
   val ACTIVE_PLAYER_IS_ON_TURN = "ist an der Reihe"
   val SET_TOKEN = "Wohin soll der neue Stein gesetzt werden?"
   val SET_TOKEN_NOT_NUMERIC = "Die eingegebene Position besteht nicht ausschließlich aus Nummern!"
+  val SET_TOKEN_WRONG_POSITION = "Die eingegebene Position befindet sich nicht auf dem Spielfeld"
   val SET_TOKEN_NO_FREE_POSITION = "Die eingegebene Position ist bereits durch einen anderen Spielstein besetzt!"
+
 }

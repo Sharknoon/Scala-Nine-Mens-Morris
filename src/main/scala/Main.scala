@@ -3,8 +3,8 @@ import view.tui.TUI
 
 object Main {
   def main(args: Array[String]): Unit = {
-    //startTUI()
-    startGUI()
+    startTUI()
+    // startGUI()
   }
 
   def startGUI(): Unit = {
