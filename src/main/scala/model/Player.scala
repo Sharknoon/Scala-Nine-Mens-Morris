@@ -1,10 +1,13 @@
 package model
 
 import model.Color.Color
+import scalafx.beans.property.IntegerProperty
 
 case class Player(name: String,
                   color: Color,
-                  var unsetTokens : Int = GameConstants.AMOUNT_TOKENS)
+                  unsetTokens: IntegerProperty = new IntegerProperty() {
+                    value = GameConstants.AMOUNT_TOKENS
+                  })
 
 
 

@@ -5,21 +5,27 @@ import scalafx.beans.property.ObjectProperty
 
 class GameController(game: Game) {
 
-  private var activePlayer = game.players._1
+  private val activePlayer = new ObjectProperty[Player]() {
+    value = game.players._1
+  }
 
   /**
     * Change the active player in case that the turn of the current player
     * is over
     */
   def changePlayer(): Player = {
-    activePlayer = if (activePlayer == game.players._1) game.players._2 else game.players._1
-    activePlayer
+    activePlayer.set(if (getActivePlayer == game.players._1) game.players._2 else game.players._1)
+    getActivePlayer
   }
 
   /**
     * Returns the current active player
     */
   def getActivePlayer: Player = {
+    activePlayer.get()
+  }
+
+  def activePlayerProperty: ObjectProperty[Player] = {
     activePlayer
   }
 
@@ -34,8 +40,8 @@ class GameController(game: Game) {
     * Checks if a player has already set all his tokens or not
     * at the beginning of the game
     */
-  def canSetTokens(player: Player): Boolean = {
-    player.unsetTokens > 0
+  def canSetTokens(): Boolean = {
+    getActivePlayer.unsetTokens.get() > 0
   }
 
   /**
@@ -43,9 +49,9 @@ class GameController(game: Game) {
     * Each player has 9 tokens to set
     */
   def setToken(position: (Int, Int)): Unit = {
-    val newToken = Token(activePlayer)
+    val newToken = Token(getActivePlayer)
     game.playground.fields(position).set(newToken)
-    activePlayer.unsetTokens -= 1
+    getActivePlayer.unsetTokens.value -= 1
   }
 
   /**
@@ -172,6 +178,6 @@ class GameController(game: Game) {
     if (token == null) {
       return false
     }
-    token.player == activePlayer
+    token.player == getActivePlayer
   }
 }

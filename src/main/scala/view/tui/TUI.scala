@@ -45,7 +45,7 @@ class TUI {
     // Check if active player has to set one of his 9 tokens
     // If yes, he has to set a token
     // If no, he has to move or jump (if allowed) with a token
-    if (gameController.canSetTokens(activePlayer)) {
+    if (gameController.canSetTokens()) {
       setToken(gameController)
     } else {
       moveToken(gameController)
