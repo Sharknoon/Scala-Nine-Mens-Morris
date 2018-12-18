@@ -179,4 +179,72 @@ class GameController(game: Game) {
     }
     token.player == getActivePlayer
   }
+
+  /**
+    *
+    * @param position
+    * @return
+    */
+  def moveToken(currentPosition: (Int, Int), toMovePosition: (Int, Int)): Boolean = {
+
+    // Position is already occupied by another token
+    if (!isPositionFree(toMovePosition)) {
+      return false
+    }
+
+    // Get successor and predecessor position
+    val successor = (currentPosition._1, getRingField(currentPosition._2, _ + 1))
+    val predecessor = (currentPosition._1, getRingField(currentPosition._2, _ - 1))
+
+    // Either successor or predecessor is equal to move position
+    // Change token in playground
+    if (toMovePosition == successor || toMovePosition == predecessor) {
+      val currentPositionToken = game.playground.fields(currentPosition).get()
+      game.playground.fields(currentPosition).set(null)
+      game.playground.fields(toMovePosition).set(currentPositionToken)
+      return true
+    }
+
+    // Check for middle
+    if ((currentPosition._2 % 2) == 0) {
+
+      var firstRingPosition = (-1, -1)
+      var secondRingPosition = (-1, -1)
+      // Check the ring
+      currentPosition._1 match {
+        // Only move to ring 2
+        case 1 => firstRingPosition = (2, currentPosition._2)
+        case 2 => {
+          firstRingPosition = (1, currentPosition._2)
+          secondRingPosition = (3, currentPosition._2)
+        }
+        case 3 => firstRingPosition = (2, currentPosition._2)
+      }
+
+      if (toMovePosition == firstRingPosition || toMovePosition == secondRingPosition) {
+        val currentPositionToken = game.playground.fields(currentPosition).get()
+        game.playground.fields(currentPosition).set(null)
+        game.playground.fields(toMovePosition).set(currentPositionToken)
+        return true
+      }
+    }Patric
+    false
+  }
+
+  /**
+    *
+    */
+  def deleteOpponentToken(position: (Int, Int)): Boolean = {
+
+    val positionToken = game.playground.fields(position).get()
+
+    // Position has no token of opponent player
+    if (positionToken == null || positionToken.player == getActivePlayer) {
+      false
+    } else {
+      // Delete opponent token
+      game.playground.fields(position).set(null)
+      true
+    }
+  }
 }

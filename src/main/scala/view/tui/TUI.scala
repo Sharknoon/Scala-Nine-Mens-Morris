@@ -45,10 +45,15 @@ class TUI {
     // Check if active player has to set one of his 9 tokens
     // If yes, he has to set a token
     // If no, he has to move or jump (if allowed) with a token
-    if (gameController.canSetTokens()) {
+    val tokenPosition = if (gameController.canSetTokens()) {
       setToken(gameController)
     } else {
       moveToken(gameController)
+    }
+
+    // 3 tokens in a row => active player is allowed to remove a token from other player
+    if (gameController.checkForThreeInARow(tokenPosition)) {
+      deleteOpponentToken(gameController)
     }
     gameController.changePlayer()
     changeTurn(gameController)
@@ -147,45 +152,27 @@ class TUI {
   /**
     * Ask active player for setting a token
     */
-  def setToken(gameController: GameController): Unit = {
+  def setToken(gameController: GameController): (Int, Int) = {
     // Get input of the token position
     println(StringConstants.SET_TOKEN)
     val positionInput = scala.io.StdIn.readLine()
 
-    // Position must contain 2 digits
-    if(positionInput.length < 2){
+    val position = checkPositionInput(positionInput)
+
+    if(position.isEmpty){
       println(StringConstants.SET_TOKEN_WRONG_POSITION)
-      setToken(gameController)
-      return
-    }
-
-    // Check that all chars of the input string are numbers
-    if (!isAllDigits(positionInput)) {
-      println(StringConstants.SET_TOKEN_NOT_NUMERIC)
-      setToken(gameController)
-      return
-    }
-
-    val ring = positionInput.charAt(0)
-    val field = positionInput.charAt(1)
-    val position = (ring.toString.toInt, field.toString.toInt)
-
-    // Wrong position
-    if(position._1 == 0 || position._1 > 3 || position._2 == 0 || position._2 > 8){
-      println(StringConstants.SET_TOKEN_WRONG_POSITION)
-      setToken(gameController)
-      return
+      return setToken(gameController)
     }
 
     // check if the position is still free
-    if (!gameController.isPositionFree(position)) {
+    if (!gameController.isPositionFree(position.get)) {
       println(StringConstants.SET_TOKEN_NO_FREE_POSITION)
-      setToken(gameController)
-      return
+      return setToken(gameController)
     }
 
     // Set token to position
-    gameController.setToken(position)
+    gameController.setToken(position.get)
+    position.get
   }
 
   /**
@@ -196,8 +183,87 @@ class TUI {
   /**
     * Move token
     */
-  def moveToken(gameController: GameController): Unit = {
+  def moveToken(gameController: GameController): (Int, Int) = {
 
+    // Get input of the token position which should be moved
+    println(StringConstants.MOVE_TOKEN)
+    val positionInput = scala.io.StdIn.readLine()
+
+    // Check if position input is valid
+    val positionOption = checkPositionInput(positionInput)
+
+    if(positionOption.isEmpty){
+      println(StringConstants.MOVE_TOKEN_WRONG_POSITION)
+      return moveToken(gameController)
+    }
+
+    // Check if input position contains a token of the active player
+    if(!gameController.isPositionSetByCurrentPlayer(positionOption.get)){
+      println(StringConstants.MOVE_TOKEN_FAIL)
+      return moveToken(gameController)
+    }
+
+    // Get input of the new token position
+    println(StringConstants.MOVE_TOKEN_NEW_POSITION)
+    val newPositionInput = scala.io.StdIn.readLine()
+
+    // Check if position input is valid
+    val newPositionOption = checkPositionInput(newPositionInput)
+
+    if(newPositionOption.isEmpty){
+      println(StringConstants.MOVE_TOKEN_WRONG_POSITION)
+      return moveToken(gameController)
+    }
+
+    (0, 0)
+  }
+
+  /**
+    * Move token
+    */
+  def deleteOpponentToken(gameController: GameController): Unit = {
+    println(StringConstants.DELETE_OPPONENT_TOKEN)
+    val deleteTokenPositionInput = scala.io.StdIn.readLine()
+    val deleteTokenPositionOption = checkPositionInput(deleteTokenPositionInput)
+
+    // Wrong position input
+    if(deleteTokenPositionOption.isEmpty){
+      println(StringConstants.SET_TOKEN_WRONG_POSITION)
+      deleteOpponentToken(gameController)
+      return
+    }
+
+    // No token or opponent token on position
+    if(!gameController.deleteOpponentToken(deleteTokenPositionOption.get)){
+      println(StringConstants.DELETE_OPPONENT_TOKEN_FAIL)
+      deleteOpponentToken(gameController)
+    }
+  }
+
+  /**
+    * Checks if the position input is valid
+    */
+  def checkPositionInput(positionInput: String): Option[(Int, Int)] = {
+
+    // Position must contain 2 digits
+    if (positionInput.length < 2) {
+     return Option.empty
+    }
+
+    // Check that all chars of the input string are numbers
+    if (!isAllDigits(positionInput)) {
+      return Option.empty
+    }
+
+    val ring = positionInput.charAt(0)
+    val field = positionInput.charAt(1)
+    val position = (ring.toString.toInt, field.toString.toInt)
+
+    // Wrong position
+    if (position._1 == 0 || position._1 > 3 || position._2 == 0 || position._2 > 8) {
+      return Option.empty
+    }
+
+    Option(position)
   }
 }
-
