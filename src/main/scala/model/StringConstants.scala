@@ -1,5 +1,6 @@
 package model
 
+//noinspection SpellCheckingInspection
 object StringConstants {
   val TITLE = "Mühle"
   val START_NEW_GAME = "Neues Spiel starten"

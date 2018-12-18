@@ -2,7 +2,7 @@ package view.gui
 
 import controller.{GameController, MenuController}
 import model.Color.Color
-import model.{Color, Game, StringConstants, Token}
+import model.{Color, StringConstants, Token}
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.beans.property.ObjectProperty
@@ -16,10 +16,12 @@ import scalafx.scene.{Group, Scene, paint}
 
 object GUI extends JFXApp {
 
+  //Main Borderpane with beige background
   private val main = new BorderPane() {
     style = "-fx-base: beige"
   }
 
+  //Sets the state with the title and a icon at a maximized state and the borderpane main
   stage = new JFXApp.PrimaryStage {
     title.value = StringConstants.TITLE
     maximized = true
@@ -31,16 +33,25 @@ object GUI extends JFXApp {
 
   initStartMenu(main)
 
+  /**
+    * Shows the start menu
+    *
+    * @param pane the root pane
+    */
   private def initStartMenu(pane: BorderPane): Unit = {
+    //The label showing start new game
     val labelTitle = new Label(StringConstants.START_NEW_GAME)
     labelTitle.font = Font.apply(40)
 
+    //Both player labels
     val labelPlayer1 = new Label(StringConstants.PLAYER1)
     val labelPlayer2 = new Label(StringConstants.PLAYER2)
 
+    //Both player names textfields
     val textFieldPlayer1 = new TextField()
     val textFieldPlayer2 = new TextField()
 
+    //The button to start a new game, makes a new menucontroller and starts the game, also shows the playground
     val button = new Button(StringConstants.START_GAME)
     button.onAction = handle {
       val menuController = new MenuController((textFieldPlayer1.getText(), textFieldPlayer2.getText))
@@ -48,25 +59,45 @@ object GUI extends JFXApp {
       initPlayground(pane, game)
     }
 
+    //makes all the inputs in a vertical box
     val vbox = new VBox(5)
     vbox.children.addAll(labelTitle, labelPlayer1, textFieldPlayer1, labelPlayer2, textFieldPlayer2, button)
 
+    //setting this vertical box in a group to keep it only as big as necessary
     pane.center = new Group() {
       children = vbox
     }
   }
 
-  private def initPlayground(pane: BorderPane, game: GameController): Unit = {
+  /**
+    * Creates a new playground
+    *
+    * @param pane           The pane on which the playground should be created on
+    * @param gameController The controller for the logic
+    */
+  private def initPlayground(pane: BorderPane, gameController: GameController): Unit = {
+    //Clearing all the previous children
     pane.children.clear()
-    pane.center = createPlayground()
+    //The new playground in the middle
+    val playground = createPlayground()
+    pane.center = playground
+    //A status label at the bottom
     pane.bottom = createPlaygroundLabel()
-    bindTokens(game, pane.center.asInstanceOf[Group])
+    //Binding the tokens to the model
+    bindTokens(gameController, playground)
   }
 
+  /**
+    * Creates the main playground
+    *
+    * @return The newly created playground
+    */
   private def createPlayground(): Group = {
+    //A handy dandy multiplier for the size
     val multiplier = 100
     val group = new Group()
 
+    //The path of the lines
     val path = new Path()
     path.setStrokeWidth(10)
     path.getElements.addAll(
@@ -95,6 +126,7 @@ object GUI extends JFXApp {
       LineTo(2 * multiplier, 3 * multiplier)
     )
 
+    //Adding the circles
     group.getChildren.addAll(
       path,
       Circle(0, 0, multiplier / 5),
@@ -128,6 +160,11 @@ object GUI extends JFXApp {
     group
   }
 
+  /**
+    * Creates a status label for the playground
+    *
+    * @return The newly created status label
+    */
   private def createPlaygroundLabel(): Pane = {
     new StackPane() {
       children = new Label() {
@@ -138,8 +175,14 @@ object GUI extends JFXApp {
     }
   }
 
-  private def bindTokens(game: GameController, group: Group): Unit = {
-    game.getGame.playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
+  /**
+    * Binds the tokens to the model
+    *
+    * @param gameController The controller for the logic
+    * @param group          The group in which the playground is located
+    */
+  private def bindTokens(gameController: GameController, group: Group): Unit = {
+    gameController.getGame.playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
       val tokenUI = new TokenUI()
       tuple._2.onChange((_, _, newToken) =>
         if (newToken == null) {
@@ -159,19 +202,18 @@ object GUI extends JFXApp {
 
   }
 
+  /**
+    * This class represents a token in the UI
+    */
   private class TokenUI extends Group {
-    private val outerCircle = new Circle()
-    init()
+    private val outerCircle = new Circle() {
+      radius = 50
+      fill = paint.Color.Black
+    }
+    children = outerCircle
 
     def setColor(color: Color): Unit = {
-      val c = if (color == Color.BLACK) paint.Color.Black else paint.Color.White
-      outerCircle.fill = c
-    }
-
-    private def init(): Unit = {
-      outerCircle.radius = 50
-      outerCircle.fill = paint.Color.Black
-      this.children = outerCircle
+      outerCircle.fill = if (color == Color.BLACK) paint.Color.Black else paint.Color.White
     }
 
   }
