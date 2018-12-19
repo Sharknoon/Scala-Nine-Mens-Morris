@@ -2,6 +2,8 @@ package model
 
 //noinspection SpellCheckingInspection
 object StringConstants {
+
+
   val TITLE = "Mühle"
   val START_NEW_GAME = "Neues Spiel starten"
   val PLAYER1 = "Spieler 1"
@@ -23,4 +25,9 @@ object StringConstants {
   val MOVE_TOKEN_DESTINATION_FAIL = "Die eingegebene Position ist nicht frei oder ist nicht mit einem Zug erreichbar!"
   val GAME_WON_1 = "Herzlichen Glückwunsch "
   val GAME_WON_2 = ", du hast das Spiel gewonnen!"
+  val JUMP_TOKEN = "Mit welchem Stein soll gesprungen werden?"
+  val JUMP_TOKEN_WRONG_POSITION = "Die eingegebene Position befindet sich nicht auf dem Spielfeld"
+  val JUMP_TOKEN_FAIL = "Auf der eingegebene Position befindet sich kein Stein Ihrer Farbe!"
+  val JUMP_TOKEN_NEW_POSITION = "Wohin soll der Stein springen?"
+  val JUMP_TOKEN_DESTINATION_FAIL = "Die eingegebene Position ist nicht frei!"
 }

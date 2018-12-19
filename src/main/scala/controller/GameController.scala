@@ -45,6 +45,26 @@ class GameController(game: Game) {
   }
 
   /**
+    * Deletes the token of the opponent player at the specified position
+    */
+  def deleteOpponentToken(position: (Int, Int)): Boolean = {
+
+    val positionToken = game.playground.fields(position).get()
+
+    // Position has no token of opponent player or the token is protected
+    if (positionToken == null ||
+      positionToken.player == getActivePlayer ||
+      checkForThreeInARow(position, getOpponentPlayer)) {
+      false
+    } else {
+      // Delete opponent token
+      game.playground.fields(position).set(null)
+      getOpponentPlayer.tokensInGame.value -= 1
+      true
+    }
+  }
+
+  /**
     * Set a token of a player to the playground at the beginning of the game
     * Each player has 9 tokens to set
     */
@@ -69,7 +89,7 @@ class GameController(game: Game) {
     * Checks if the active player gets 3 tokens in a row after he sets or move a token
     * In this case the active player is allowed to remove one token from the other player
     */
-  def checkForThreeInARow(position: (Int, Int)): Boolean = {
+  def checkForThreeInARow(position: (Int, Int), player: Player = getActivePlayer): Boolean = {
 
     // Corner field
     // New position of the moved token is in a corner (all odd fields)
@@ -82,7 +102,7 @@ class GameController(game: Game) {
 
       // The previous token has the same color as the active player,
       // check the second previous token
-      if (isPositionSetByCurrentPlayer((position._1, firstPredecessor))) {
+      if (isPositionSetBy((position._1, firstPredecessor), player)) {
         // Check two previous token
         // Exception field 1 => in this case the previous token is 8
         // In all other case the previous tokens can be calculate by modulo 8
@@ -90,7 +110,7 @@ class GameController(game: Game) {
 
         // The second previous token has also the same color as the active player
         // 3 same color tokens are in one row
-        if (isPositionSetByCurrentPlayer((position._1, secondPredecessor))) {
+        if (isPositionSetBy((position._1, secondPredecessor), player)) {
           return true
         }
       }
@@ -100,7 +120,7 @@ class GameController(game: Game) {
 
       // The successor token has the same color as the active player,
       // check the second successor token
-      if (isPositionSetByCurrentPlayer((position._1, firstSuccessor))) {
+      if (isPositionSetBy((position._1, firstSuccessor), player)) {
         // Check two previous token
         // Exception field 1 => in this case the previous token is 8
         // In all other case the previous tokens can be calculate by modulo 8
@@ -108,7 +128,7 @@ class GameController(game: Game) {
 
         // The second successor token has also the same color as the active player
         // 3 same color tokens are in one row
-        if (isPositionSetByCurrentPlayer((position._1, secondSuccessor))) {
+        if (isPositionSetBy((position._1, secondSuccessor), player)) {
           return true
         }
       }
@@ -121,13 +141,13 @@ class GameController(game: Game) {
       val left = getRingField(position._2, _ - 1)
 
       //Check for the left neighbour, only then the check for the right neighbour is necessary
-      if (isPositionSetByCurrentPlayer((position._1, left))) {
+      if (isPositionSetBy((position._1, left), player)) {
 
         //The right neighbour of the token in the ring
         val right = getRingField(position._2, _ + 1)
 
         //This means that both neighbours have the same color as this token
-        if (isPositionSetByCurrentPlayer((position._1, right))) {
+        if (isPositionSetBy((position._1, right), player)) {
           return true
         }
       }
@@ -143,10 +163,10 @@ class GameController(game: Game) {
       }
 
       //Check the first ring
-      if (isPositionSetByCurrentPlayer((positionsToCheck._1, position._2))) {
+      if (isPositionSetBy((positionsToCheck._1, position._2), player)) {
 
         //Check second ring
-        if (isPositionSetByCurrentPlayer((positionsToCheck._2, position._2))) {
+        if (isPositionSetBy((positionsToCheck._2, position._2), player)) {
           return true
         }
       }
@@ -171,14 +191,14 @@ class GameController(game: Game) {
   }
 
   /**
-    * Checks if the token of the hand over position has the same color as the active player
+    * Checks if the token of the hand over position has the same color as the player, default player is the active player
     */
-  def isPositionSetByCurrentPlayer(position: (Int, Int)): Boolean = {
+  def isPositionSetBy(position: (Int, Int), player: Player = getActivePlayer): Boolean = {
     val token = game.playground.fields(position).get()
     if (token == null) {
       return false
     }
-    token.player == getActivePlayer
+    token.player == player
   }
 
   /**
@@ -234,34 +254,6 @@ class GameController(game: Game) {
   }
 
   /**
-    * Deletes the token of the opponent player at the specified position
-    */
-  def deleteOpponentToken(position: (Int, Int)): Boolean = {
-
-    val positionToken = game.playground.fields(position).get()
-
-    // Position has no token of opponent player or the token is protected
-    if (positionToken == null ||
-      positionToken.player == getActivePlayer ||
-      checkForThreeInARow(position)) {
-      false
-    } else {
-      // Delete opponent token
-      game.playground.fields(position).set(null)
-      getOpponentPlayer.tokensInGame.value -= 1
-      true
-    }
-  }
-
-  def getOpponentPlayer: Player = {
-    if (game.players._1 == getActivePlayer) {
-      game.players._2
-    } else {
-      game.players._1
-    }
-  }
-
-  /**
     * Checks if a player isn't able to move a token or he has only two tokens left
     *
     * @return the winner
@@ -277,22 +269,65 @@ class GameController(game: Game) {
       return true
     }
 
-    //All tokens of the game
-    val tokensOfOpponentPlayer = game
-      .playground
-      .fields
-      .filter(e => e._2.value != null)
-      .filter(e => e._2.get().player == getOpponentPlayer)
+    //Check if the player has more than 3 tokens and is trapped
+    if (getOpponentPlayer.tokensInGame.get() > 3) {
 
-    for (token <- tokensOfOpponentPlayer) {
-      //Check if a player cant move
-      if (canMove(token._1)) {
-        //if the player can move no winner
-        return false
+      //All tokens of the game
+      val tokensOfOpponentPlayer = game
+        .playground
+        .fields
+        .filter(e => e._2.value != null)
+        .filter(e => e._2.get().player == getOpponentPlayer)
+
+      for (token <- tokensOfOpponentPlayer) {
+        //Check if a player cant move
+        if (canMove(token._1)) {
+          //if the player can move no winner
+          return false
+        }
       }
+    } else {
+      return false
     }
 
     //game is over
+    true
+  }
+
+  def getOpponentPlayer: Player = {
+    if (game.players._1 == getActivePlayer) {
+      game.players._2
+    } else {
+      game.players._1
+    }
+  }
+
+  /**
+    * Jumps a token to another position
+    *
+    * @param currentPosition the current token to be jumped
+    * @param toJumpPosition  the destination
+    * @return true if successful false otherwise
+    */
+  def jumpToken(currentPosition: (Int, Int), toJumpPosition: (Int, Int)): Boolean = {
+    // I am not allowed to jump
+    if (!canJumpTokens) {
+      return false
+    }
+
+    // Position isn't my token
+    if (!isPositionSetBy(currentPosition)) {
+      return false
+    }
+
+    // Position is already occupied by another token
+    if (!isPositionFree(toJumpPosition)) {
+      return false
+    }
+
+    val currentPositionToken = game.playground.fields(currentPosition).get()
+    game.playground.fields(currentPosition).set(null)
+    game.playground.fields(toJumpPosition).set(currentPositionToken)
     true
   }
 
@@ -339,5 +374,9 @@ class GameController(game: Game) {
     }
 
     true
+  }
+
+  def canJumpTokens: Boolean = {
+    getActivePlayer.tokensInGame.get() == 3
   }
 }

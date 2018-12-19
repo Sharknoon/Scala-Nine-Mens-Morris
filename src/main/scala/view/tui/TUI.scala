@@ -52,6 +52,8 @@ class TUI {
       // If no, he has to move or jump (if allowed) with a token
       val tokenPosition = if (gameController.canSetTokens) {
         setToken(gameController)
+      } else if (gameController.canJumpTokens) {
+        jumpToken(gameController)
       } else {
         moveToken(gameController)
       }
@@ -189,7 +191,7 @@ class TUI {
     val currentPositionOption = getPositionInput(
       StringConstants.MOVE_TOKEN,
       StringConstants.MOVE_TOKEN_WRONG_POSITION,
-      pos => gameController.isPositionSetByCurrentPlayer(pos) && gameController.canMove(pos),
+      pos => gameController.isPositionSetBy(pos) && gameController.canMove(pos),
       StringConstants.MOVE_TOKEN_FAIL
     )
 
@@ -269,5 +271,21 @@ class TUI {
     }
 
     Option(position)
+  }
+
+  private def jumpToken(gameController: GameController): (Int, Int) = {
+    val currentPositionOption = getPositionInput(
+      StringConstants.JUMP_TOKEN,
+      StringConstants.JUMP_TOKEN_WRONG_POSITION,
+      gameController.isPositionSetBy(_),
+      StringConstants.JUMP_TOKEN_FAIL
+    )
+
+    getPositionInput(
+      StringConstants.JUMP_TOKEN_NEW_POSITION,
+      StringConstants.JUMP_TOKEN_WRONG_POSITION,
+      gameController.jumpToken(currentPositionOption, _),
+      StringConstants.JUMP_TOKEN_DESTINATION_FAIL
+    )
   }
 }
