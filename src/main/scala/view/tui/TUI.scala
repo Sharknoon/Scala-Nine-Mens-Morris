@@ -1,7 +1,7 @@
 package view.tui
 
 import controller.{GameController, MenuController}
-import model.{Color, Player, Playground, StringConstants}
+import model.{Color, Playground, StringConstants}
 
 import scala.io.StdIn
 import scala.util.control.Breaks._
@@ -36,10 +36,9 @@ class TUI {
     * Starts new turn for the next player
     */
   def changeTurn(gameController: GameController): Unit = {
-    //The winner of the game
-    var winner: Option[Player] = gameController.isGameOver
+    var isGameOver = false
     //game keeps running until there is a winner
-    while (winner.isEmpty) {
+    while (!isGameOver) {
       val activePlayer = gameController.getActivePlayer
       println(StringConstants.ACTIVE_PLAYER + activePlayer.name + " (" + activePlayer.color + ") " + StringConstants.ACTIVE_PLAYER_IS_ON_TURN)
 
@@ -62,13 +61,14 @@ class TUI {
         deleteOpponentToken(gameController)
       }
 
-      //check for winner
-      winner = gameController.isGameOver
       //only change the player when there is no winner
-      if (winner.isEmpty) {
+      isGameOver = gameController.isGameOver
+      if (!isGameOver) {
         gameController.changePlayer()
       }
     }
+    //currentplayer has won
+    println(StringConstants.GAME_WON_1 + gameController.getActivePlayer.name + StringConstants.GAME_WON_2)
   }
 
   /**
@@ -189,7 +189,7 @@ class TUI {
     val currentPositionOption = getPositionInput(
       StringConstants.MOVE_TOKEN,
       StringConstants.MOVE_TOKEN_WRONG_POSITION,
-      gameController.isPositionSetByCurrentPlayer,
+      pos => gameController.isPositionSetByCurrentPlayer(pos) && gameController.canMove(pos),
       StringConstants.MOVE_TOKEN_FAIL
     )
 

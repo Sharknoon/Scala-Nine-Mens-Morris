@@ -3,8 +3,6 @@ package controller
 import model.{Game, Player, Token}
 import scalafx.beans.property.ObjectProperty
 
-import scala.collection.mutable
-
 class GameController(game: Game) {
 
   private val activePlayer = new ObjectProperty[Player]() {
@@ -250,7 +248,16 @@ class GameController(game: Game) {
     } else {
       // Delete opponent token
       game.playground.fields(position).set(null)
+      getOpponentPlayer.tokensInGame.value -= 1
       true
+    }
+  }
+
+  def getOpponentPlayer: Player = {
+    if (game.players._1 == getActivePlayer) {
+      game.players._2
+    } else {
+      game.players._1
     }
   }
 
@@ -259,48 +266,34 @@ class GameController(game: Game) {
     *
     * @return the winner
     */
-  def isGameOver: Option[Player] = {
-    val player1 = game.players._1
-    val player2 = game.players._2
+  def isGameOver: Boolean = {
+    //If we are in the token set phase
+    if (getOpponentPlayer.unsetTokens.get() > 0) {
+      return false
+    }
 
     //Check if there are only two tokens left, if so, return the winner
-    if (player1.tokensInGame.get() < 3) {
-      return Option(player2)
+    if (getOpponentPlayer.tokensInGame.get() < 3) {
+      return true
     }
-    if (player2.tokensInGame.get() < 3) {
-      return Option(player1)
-    }
-
-    //map for storing the amount of non movable tokens to check against all tokens
-    //of the player in the playground
-    val canPlayerMove = new mutable.HashMap[Player, Int]()
-    canPlayerMove.put(player1, 0)
-    canPlayerMove.put(player2, 0)
 
     //All tokens of the game
-    val tokens = game.playground.fields.filter(e => e._2.value != null)
-    for (token <- tokens) {
-      //For every token in the playground
-      val playerOfTheToken = token._2.get().player
+    val tokensOfOpponentPlayer = game
+      .playground
+      .fields
+      .filter(e => e._2.value != null)
+      .filter(e => e._2.get().player == getOpponentPlayer)
+
+    for (token <- tokensOfOpponentPlayer) {
       //Check if a player cant move
-      if (!canMove(token._1)) {
-        //if the player cant move, increase the counter
-        canPlayerMove(playerOfTheToken) += 1
+      if (canMove(token._1)) {
+        //if the player can move no winner
+        return false
       }
     }
 
-    //If the amount of the non movable tokens equals the amount of tokens the player
-    //has on the field, then he has lost (opposite has won)
-    if (canPlayerMove(player1) >= player1.tokensInGame.get()) {
-      return Option(player2)
-    }
-
-    if (canPlayerMove(player2) >= player2.tokensInGame.get()) {
-      return Option(player1)
-    }
-
-    //game can continue
-    Option.empty
+    //game is over
+    true
   }
 
   /**
@@ -309,7 +302,7 @@ class GameController(game: Game) {
     * @param token The token to be checked against
     * @return True if this token is able to move, false otherwise
     */
-  private def canMove(token: (Int, Int)): Boolean = {
+  def canMove(token: (Int, Int)): Boolean = {
     val ringFieldPredecessor = (token._1, getRingField(token._2, _ - 1))
     val ringFieldSuccessor = (token._1, getRingField(token._2, _ + 1))
 
