@@ -40,7 +40,7 @@ class GameController(game: Game) {
     * Checks if a player has already set all his tokens or not
     * at the beginning of the game
     */
-  def canSetTokens(): Boolean = {
+  def canSetTokens: Boolean = {
     getActivePlayer.unsetTokens.get() > 0
   }
 
@@ -181,9 +181,11 @@ class GameController(game: Game) {
   }
 
   /**
+    * Moves a token
     *
-    * @param position
-    * @return
+    * @param currentPosition the current position of the token
+    * @param toMovePosition  the destination of the new token
+    * @return true if allowed and successful, false otherwise
     */
   def moveToken(currentPosition: (Int, Int), toMovePosition: (Int, Int)): Boolean = {
 
@@ -214,10 +216,9 @@ class GameController(game: Game) {
       currentPosition._1 match {
         // Only move to ring 2
         case 1 => firstRingPosition = (2, currentPosition._2)
-        case 2 => {
+        case 2 =>
           firstRingPosition = (1, currentPosition._2)
           secondRingPosition = (3, currentPosition._2)
-        }
         case 3 => firstRingPosition = (2, currentPosition._2)
       }
 
@@ -227,12 +228,12 @@ class GameController(game: Game) {
         game.playground.fields(toMovePosition).set(currentPositionToken)
         return true
       }
-    }Patric
+    }
     false
   }
 
   /**
-    *
+    * Deletes the token of the opponent player at the specified position
     */
   def deleteOpponentToken(position: (Int, Int)): Boolean = {
 
@@ -246,5 +247,15 @@ class GameController(game: Game) {
       game.playground.fields(position).set(null)
       true
     }
+  }
+
+  /**
+    * Checks if a player isn't able to move a token or he has only two tokens left
+    *
+    * @return true if the game finished
+    */
+  def isGameOver: Boolean = {
+    //TODO
+    false
   }
 }

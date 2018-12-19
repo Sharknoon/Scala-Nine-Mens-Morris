@@ -16,8 +16,9 @@ object StringConstants {
   val SET_TOKEN_NO_FREE_POSITION = "Die eingegebene Position ist bereits durch einen anderen Spielstein besetzt!"
   val DELETE_OPPONENT_TOKEN = "Mühle! Sie dürfen einen gegnerischen Stein entfernen. Bitte Position eingeben!"
   val DELETE_OPPONENT_TOKEN_FAIL = "Auf der eingegebenen Position befindet sich keinen oder kein gegnerischer Spielstein!"
-  val MOVE_TOKEN = "Welche Stein soll bewegt werden?"
+  val MOVE_TOKEN = "Welcher Stein soll bewegt werden?"
   val MOVE_TOKEN_WRONG_POSITION = "Die eingegebene Position befindet sich nicht auf dem Spielfeld"
   val MOVE_TOKEN_FAIL = "Auf der eingegebene Position befindet sich kein Stein Ihrer Farbe!"
   val MOVE_TOKEN_NEW_POSITION = "Wohin soll der Stein bewegt werden?"
+  val MOVE_TOKEN_DESTINATION_FAIL = "Die eingegebene Position ist nicht frei oder ist nicht mit einem Zug erreichbar!"
 }
