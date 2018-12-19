@@ -7,7 +7,8 @@ case class Player(name: String,
                   color: Color,
                   unsetTokens: IntegerProperty = new IntegerProperty() {
                     value = GameConstants.AMOUNT_TOKENS
-                  })
+                  },
+                  tokensInGame: IntegerProperty = new IntegerProperty())
 
 
 

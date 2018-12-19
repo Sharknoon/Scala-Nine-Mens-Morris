@@ -1,7 +1,7 @@
 package view.tui
 
 import controller.{GameController, MenuController}
-import model.{Color, Playground, StringConstants}
+import model.{Color, Player, Playground, StringConstants}
 
 import scala.io.StdIn
 import scala.util.control.Breaks._
@@ -36,7 +36,10 @@ class TUI {
     * Starts new turn for the next player
     */
   def changeTurn(gameController: GameController): Unit = {
-    while (!gameController.isGameOver) {
+    //The winner of the game
+    var winner: Option[Player] = gameController.isGameOver
+    //game keeps running until there is a winner
+    while (winner.isEmpty) {
       val activePlayer = gameController.getActivePlayer
       println(StringConstants.ACTIVE_PLAYER + activePlayer.name + " (" + activePlayer.color + ") " + StringConstants.ACTIVE_PLAYER_IS_ON_TURN)
 
@@ -58,7 +61,13 @@ class TUI {
       if (gameController.checkForThreeInARow(tokenPosition)) {
         deleteOpponentToken(gameController)
       }
-      gameController.changePlayer()
+
+      //check for winner
+      winner = gameController.isGameOver
+      //only change the player when there is no winner
+      if (winner.isEmpty) {
+        gameController.changePlayer()
+      }
     }
   }
 
@@ -156,7 +165,7 @@ class TUI {
     * Ask active player for setting a token
     */
   def setToken(gameController: GameController): (Int, Int) = {
-    var position = getPositionInput(
+    val position = getPositionInput(
       StringConstants.SET_TOKEN,
       StringConstants.SET_TOKEN_WRONG_POSITION,
       gameController.isPositionFree,

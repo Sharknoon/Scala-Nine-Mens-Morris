@@ -210,7 +210,7 @@ object GUI extends JFXApp {
       tokenUI.setLayoutY(coordinates._2)
 
       tokenUI.onMouseClicked = handle {
-        if (gameController.canSetTokens() && gameController.isPositionFree(tuple._1)) {
+        if (gameController.canSetTokens && gameController.isPositionFree(tuple._1)) {
           gameController.setToken(tuple._1)
           gameController.changePlayer()
         }

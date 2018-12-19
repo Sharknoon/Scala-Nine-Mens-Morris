@@ -3,6 +3,8 @@ package controller
 import model.{Game, Player, Token}
 import scalafx.beans.property.ObjectProperty
 
+import scala.collection.mutable
+
 class GameController(game: Game) {
 
   private val activePlayer = new ObjectProperty[Player]() {
@@ -52,6 +54,7 @@ class GameController(game: Game) {
     val newToken = Token(getActivePlayer)
     game.playground.fields(position).set(newToken)
     getActivePlayer.unsetTokens.value -= 1
+    getActivePlayer.tokensInGame.value += 1
   }
 
   /**
@@ -239,8 +242,10 @@ class GameController(game: Game) {
 
     val positionToken = game.playground.fields(position).get()
 
-    // Position has no token of opponent player
-    if (positionToken == null || positionToken.player == getActivePlayer) {
+    // Position has no token of opponent player or the token is protected
+    if (positionToken == null ||
+      positionToken.player == getActivePlayer ||
+      checkForThreeInARow(position)) {
       false
     } else {
       // Delete opponent token
@@ -252,10 +257,94 @@ class GameController(game: Game) {
   /**
     * Checks if a player isn't able to move a token or he has only two tokens left
     *
-    * @return true if the game finished
+    * @return the winner
     */
-  def isGameOver: Boolean = {
-    //TODO
-    false
+  def isGameOver: Option[Player] = {
+    val player1 = game.players._1
+    val player2 = game.players._2
+
+    //Check if there are only two tokens left, if so, return the winner
+    if (player1.tokensInGame.get() < 3) {
+      return Option(player2)
+    }
+    if (player2.tokensInGame.get() < 3) {
+      return Option(player1)
+    }
+
+    //map for storing the amount of non movable tokens to check against all tokens
+    //of the player in the playground
+    val canPlayerMove = new mutable.HashMap[Player, Int]()
+    canPlayerMove.put(player1, 0)
+    canPlayerMove.put(player2, 0)
+
+    //All tokens of the game
+    val tokens = game.playground.fields.filter(e => e._2.value != null)
+    for (token <- tokens) {
+      //For every token in the playground
+      val playerOfTheToken = token._2.get().player
+      //Check if a player cant move
+      if (!canMove(token._1)) {
+        //if the player cant move, increase the counter
+        canPlayerMove(playerOfTheToken) += 1
+      }
+    }
+
+    //If the amount of the non movable tokens equals the amount of tokens the player
+    //has on the field, then he has lost (opposite has won)
+    if (canPlayerMove(player1) >= player1.tokensInGame.get()) {
+      return Option(player2)
+    }
+
+    if (canPlayerMove(player2) >= player2.tokensInGame.get()) {
+      return Option(player1)
+    }
+
+    //game can continue
+    Option.empty
+  }
+
+  /**
+    * Checks whether a token can move or is buried
+    *
+    * @param token The token to be checked against
+    * @return True if this token is able to move, false otherwise
+    */
+  private def canMove(token: (Int, Int)): Boolean = {
+    val ringFieldPredecessor = (token._1, getRingField(token._2, _ - 1))
+    val ringFieldSuccessor = (token._1, getRingField(token._2, _ + 1))
+
+    //corner token
+    if (token._2 % 2 == 1) {
+      return isPositionFree(ringFieldPredecessor) ||
+        isPositionFree(ringFieldSuccessor)
+    } else {
+      //middle point
+
+      var firstRingPosition = (-1, -1)
+      var secondRingPosition = (-1, -1)
+
+      // Check the ring
+      token._1 match {
+        // Only possible to ring 2
+        case 1 => firstRingPosition = (2, token._2)
+        case 2 =>
+          firstRingPosition = (1, token._2)
+          secondRingPosition = (3, token._2)
+        case 3 => firstRingPosition = (2, token._2)
+      }
+
+      if (secondRingPosition._1 > 0) {
+        return isPositionFree(ringFieldPredecessor) ||
+          isPositionFree(ringFieldSuccessor) ||
+          isPositionFree(firstRingPosition) ||
+          isPositionFree(secondRingPosition)
+      } else {
+        return isPositionFree(ringFieldPredecessor) ||
+          isPositionFree(ringFieldSuccessor) ||
+          isPositionFree(firstRingPosition)
+      }
+    }
+
+    true
   }
 }

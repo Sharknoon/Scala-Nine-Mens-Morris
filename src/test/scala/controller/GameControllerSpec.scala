@@ -21,7 +21,7 @@ class GameControllerSpec extends WordSpec {
         assert(gameController.getActivePlayer == player1)
       }
       "allow the players to set tokens" in {
-        assert(gameController.canSetTokens())
+        assert(gameController.canSetTokens)
       }
       "have a empty field" in {
         playground.fields.keys.foreach(
