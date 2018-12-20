@@ -2,7 +2,7 @@ package view.gui
 
 import controller.{GameController, MenuController}
 import model.Color.Color
-import model.{Color, StringConstants, Token}
+import model.{Color, GameConstants, StringConstants, Token}
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.beans.binding.Bindings
@@ -37,65 +37,52 @@ object GUI extends JFXApp {
 
   val sizeMultiplier = 100
 
+  val statusText = new StringProperty("Demo")
+  val playerText = new StringProperty("Demo")
+  private val nextClickAction: ObjectProperty[((Int, Int)) => Unit] = new ObjectProperty[((Int, Int)) => Unit]()
+
   /**
-    * Shows the start menu
-    *
-    * @param pane the root pane
+    * Starts new game
     */
-  private def initStartMenu(pane: BorderPane): Unit = {
-    //The label showing start new game
-    val labelTitle = new Label(StringConstants.START_NEW_GAME)
-    labelTitle.font = Font.apply(40)
+  def startGame(gameController: GameController): Unit = {
+    val activePlayer = gameController.getActivePlayer
+    playerText.set(StringConstants.ACTIVE_PLAYER + activePlayer.name + " (" + activePlayer.color + ") " + StringConstants.ACTIVE_PLAYER_IS_ON_TURN)
 
-    //Both player labels
-    val labelPlayer1 = new Label(StringConstants.PLAYER1)
-    val labelPlayer2 = new Label(StringConstants.PLAYER2)
+    val callback = (tokenPosition: (Int, Int)) => {
 
-    //Both player names textfields
-    val textFieldPlayer1 = new TextField()
-    val textFieldPlayer2 = new TextField()
+      val callback2 = (_: (Int, Int)) => {
 
-    //The button to start a new game, makes a new menucontroller and starts the game, also shows the playground
-    val button = new Button(StringConstants.START_GAME)
-    button.onAction = handle {
-      val p1 = textFieldPlayer1.getText
-      val p2 = textFieldPlayer2.getText
-      //Check for correct playernames
-      if (p1.isEmpty || p1.isBlank || p2.isEmpty || p2.isBlank) {
-        new Alert(AlertType.Error, StringConstants.EMPTY_PLAYER_NAMES).showAndWait()
+        //only change the player when there is no winner
+        val isGameOver = gameController.isGameOver
+        if (!isGameOver) {
+          gameController.changePlayer()
+          startGame(gameController)
+        } else {
+          //currentplayer has won
+          statusText.set(StringConstants.GAME_WON_1 + gameController.getActivePlayer.name + StringConstants.GAME_WON_2)
+        }
+
+      }
+
+      // 3 tokens in a row => active player is allowed to remove a token from other player
+      if (gameController.checkForThreeInARow(tokenPosition)) {
+        deleteOpponentToken(gameController, callback2)
       } else {
-        val menuController = new MenuController((textFieldPlayer1.getText(), textFieldPlayer2.getText))
-        val game = menuController.startNewGame()
-        initPlayground(pane, game)
+        callback2.apply(tokenPosition)
       }
     }
 
-    //makes all the inputs in a vertical box
-    val vbox = new VBox(5)
-    vbox.children.addAll(labelTitle, labelPlayer1, textFieldPlayer1, labelPlayer2, textFieldPlayer2, button)
-
-    //setting this vertical box in a group to keep it only as big as necessary
-    pane.center = new Group() {
-      children = vbox
+    // Check if active player has to set one of his 9 tokens
+    // If yes, he has to set a token
+    // If no, he has to move or jump (if allowed) with a token
+    if (gameController.canSetTokens) {
+      setToken(gameController, callback)
+    } else if (gameController.canJumpTokens) {
+      jumpToken(gameController, callback)
+    } else {
+      moveToken(gameController, callback)
     }
-  }
 
-  /**
-    * Creates a new playground
-    *
-    * @param pane           The pane on which the playground should be created on
-    * @param gameController The controller for the logic
-    */
-  private def initPlayground(pane: BorderPane, gameController: GameController): Unit = {
-    //Clearing all the previous children
-    pane.children.clear()
-    //The new playground in the middle
-    val playground = createPlayground()
-    pane.center = playground
-    //A status label at the bottom
-    pane.bottom = createPlaygroundLabel(gameController)
-    //Binding the tokens to the model
-    bindTokens(gameController, playground)
   }
 
   /**
@@ -169,55 +156,63 @@ object GUI extends JFXApp {
     group
   }
 
-  /**
-    * Creates a status label for the playground
-    *
-    * @return The newly created status label
-    */
-  private def createPlaygroundLabel(gameController: GameController): Pane = {
-    new StackPane() {
-      children = new Label() {
-        text.bind(
-          StringProperty.apply(
-            "Demo" // StringConstants.ACTIVE_PLAYER + activePlayer.name + " (" + activePlayer.color + ") " + StringConstants.ACTIVE_PLAYER_IS_ON_TURN
-          )
-        )
-        font = Font.apply(30)
+  def requestTokenPosition(question: String,
+                           additionalCheck: ((Int, Int)) => Boolean = { _ => true },
+                           additionalCheckError: String = "NOT USED",
+                           callback: ((Int, Int)) => Unit): Unit = {
+
+    statusText.set(question)
+
+    nextClickAction.set {
+      inputPosition: (Int, Int) => {
+
+        //Perform additional check
+        if (!additionalCheck.apply(inputPosition)) {
+          statusText.set(additionalCheckError)
+          requestTokenPosition(additionalCheckError, additionalCheck, additionalCheckError, callback)
+        } else {
+          callback.apply(inputPosition)
+        }
       }
-      margin = Insets(0, 0, 30, 0)
+
     }
+
   }
 
-  /**
-    * Binds the tokens to the model
-    *
-    * @param gameController The controller for the logic
-    * @param group          The group in which the playground is located
-    */
-  private def bindTokens(gameController: GameController, group: Group): Unit = {
-    gameController.getGame.playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
-      val tokenUI = new TokenUI()
-      tuple._2.onChange((_, _, newToken) =>
-        if (newToken == null) {
-          tokenUI.activate(false)
-        } else {
-          tokenUI.activate(true)
-          tokenUI.setColor(newToken.player.color)
-        }
-      )
-      val coordinates = getCoordinatesFromIndex(tuple._1)
-      tokenUI.setLayoutX(coordinates._1)
-      tokenUI.setLayoutY(coordinates._2)
-
-      tokenUI.onMouseClicked = handle {
-        if (gameController.canSetTokens && gameController.isPositionFree(tuple._1)) {
-          gameController.setToken(tuple._1)
-          gameController.changePlayer()
-        }
+  def setToken(gameController: GameController, callback: ((Int, Int)) => Unit): Unit = {
+    val maxTokens = GameConstants.AMOUNT_TOKENS
+    requestTokenPosition(
+      StringConstants.SET_TOKEN + " (" + (maxTokens - gameController.getActivePlayer.unsetTokens.get() + 1) + "/" + maxTokens + ")",
+      gameController.isPositionFree,
+      StringConstants.SET_TOKEN_NO_FREE_POSITION,
+      (position: (Int, Int)) => {
+        // Set token to position
+        gameController.setToken(position)
+        callback.apply(position)
       }
+    )
+  }
 
-      group.children.add(tokenUI)
-    })
+  def jumpToken(gameController: GameController, callback: ((Int, Int)) => Unit): Unit = {
+    requestTokenPosition(
+      StringConstants.JUMP_TOKEN,
+      gameController.isPositionSetBy(_),
+      StringConstants.JUMP_TOKEN_FAIL,
+      (currentPosition: (Int, Int)) => {
+
+        requestTokenPosition(
+          StringConstants.JUMP_TOKEN_NEW_POSITION,
+          gameController.jumpToken(currentPosition, _),
+          StringConstants.JUMP_TOKEN_DESTINATION_FAIL,
+          (destinationPosition: (Int, Int)) => {
+
+            callback.apply(destinationPosition)
+
+          }
+        )
+
+      }
+    )
   }
 
   private def getCoordinatesFromIndex(index: (Int, Int)): (Int, Int) = {
@@ -290,5 +285,168 @@ object GUI extends JFXApp {
     val BLACKSTYLE: String = "-fx-fill: radial-gradient(radius 180%, grey, derive(grey, -30%), derive(grey, 30%))"
     val WHITESTYLE: String = "-fx-fill: radial-gradient(radius 180%, white, derive(white, -30%), derive(white, 30%))"
   }
+
+  def moveToken(gameController: GameController, callback: ((Int, Int)) => Unit): Unit = {
+    requestTokenPosition(
+      StringConstants.MOVE_TOKEN,
+      pos => gameController.isPositionSetBy(pos) && gameController.canMove(pos),
+      StringConstants.MOVE_TOKEN_FAIL,
+      (currentPosition: (Int, Int)) => {
+
+        requestTokenPosition(
+          StringConstants.MOVE_TOKEN_NEW_POSITION,
+          gameController.moveToken(currentPosition, _),
+          StringConstants.MOVE_TOKEN_DESTINATION_FAIL,
+          (destinationPosition: (Int, Int)) => {
+
+            callback.apply(destinationPosition)
+
+          }
+        )
+
+      }
+    )
+
+  }
+
+  def deleteOpponentToken(gameController: GameController, callback: ((Int, Int)) => Unit): Unit = {
+    requestTokenPosition(
+      StringConstants.DELETE_OPPONENT_TOKEN,
+      gameController.deleteOpponentToken,
+      StringConstants.DELETE_OPPONENT_TOKEN_FAIL,
+      (destinationPosition: (Int, Int)) => {
+
+        callback.apply(destinationPosition)
+
+      }
+    )
+  }
+
+  /**
+    * Shows the start menu
+    *
+    * @param pane the root pane
+    */
+  private def initStartMenu(pane: BorderPane): Unit = {
+    //The label showing start new game
+    val labelTitle = new Label(StringConstants.START_NEW_GAME)
+    labelTitle.font = Font.apply(40)
+
+    //Both player labels
+    val labelPlayer1 = new Label(StringConstants.PLAYER1)
+    val labelPlayer2 = new Label(StringConstants.PLAYER2)
+
+    //Both player names textfields
+    val textFieldPlayer1 = new TextField()
+    val textFieldPlayer2 = new TextField()
+
+    //The button to start a new game, makes a new menucontroller and starts the game, also shows the playground
+    val button = new Button(StringConstants.START_GAME)
+    button.onAction = handle {
+      val p1 = textFieldPlayer1.getText
+      val p2 = textFieldPlayer2.getText
+      //Check for correct playernames
+      if (p1.isEmpty || p1.isBlank || p2.isEmpty || p2.isBlank) {
+        new Alert(AlertType.Error, StringConstants.EMPTY_PLAYER_NAMES).showAndWait()
+      } else {
+        val menuController = new MenuController((textFieldPlayer1.getText(), textFieldPlayer2.getText))
+        val gameController = menuController.startNewGame()
+        initPlayground(pane, gameController)
+        startGame(gameController)
+      }
+    }
+
+    //makes all the inputs in a vertical box
+    val vbox = new VBox(5)
+    vbox.children.addAll(labelTitle, labelPlayer1, textFieldPlayer1, labelPlayer2, textFieldPlayer2, button)
+
+    //setting this vertical box in a group to keep it only as big as necessary
+    pane.center = new Group() {
+      children = vbox
+    }
+  }
+
+  /**
+    * Creates a new playground
+    *
+    * @param pane           The pane on which the playground should be created on
+    * @param gameController The controller for the logic
+    */
+  private def initPlayground(pane: BorderPane, gameController: GameController): Unit = {
+    //Clearing all the previous children
+    pane.children.clear()
+    //The new playground in the middle
+    val playground = createPlayground()
+    pane.center = playground
+    //A status label at the bottom
+    pane.bottom = createStatusLabel(gameController)
+    pane.top = createPlayerLabel(gameController)
+    //Binding the tokens to the model
+    bindTokens(gameController, playground)
+  }
+
+  /**
+    * Creates a status label for the playground
+    *
+    * @return The newly created status label
+    */
+  private def createStatusLabel(gameController: GameController): Pane = {
+    new StackPane() {
+      children = new Label() {
+        text.bind(statusText)
+        font = Font.apply(30)
+      }
+      margin = Insets(0, 0, 30, 0)
+    }
+  }
+
+  /**
+    * Creates a status label for the playground
+    *
+    * @return The newly created status label
+    */
+  private def createPlayerLabel(gameController: GameController): Pane = {
+    new StackPane() {
+      children = new Label() {
+        text.bind(playerText)
+        font = Font.apply(35)
+      }
+      margin = Insets(30, 0, 0, 0)
+    }
+  }
+
+  /**
+    * Binds the tokens to the model
+    *
+    * @param gameController The controller for the logic
+    * @param group          The group in which the playground is located
+    */
+  private def bindTokens(gameController: GameController, group: Group): Unit = {
+    gameController.getGame.playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
+      val tokenUI = new TokenUI()
+      tuple._2.onChange((_, _, newToken) =>
+        if (newToken == null) {
+          tokenUI.activate(false)
+        } else {
+          tokenUI.activate(true)
+          tokenUI.setColor(newToken.player.color)
+        }
+      )
+      val coordinates = getCoordinatesFromIndex(tuple._1)
+      tokenUI.setLayoutX(coordinates._1)
+      tokenUI.setLayoutY(coordinates._2)
+
+      tokenUI.onMouseClicked = handle {
+        val action = nextClickAction.value
+        if (action != null) {
+          action.apply(tuple._1)
+        }
+        null
+      }
+
+      group.children.add(tokenUI)
+    })
+  }
+
 
 }

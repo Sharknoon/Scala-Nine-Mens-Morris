@@ -1,7 +1,7 @@
 package view.tui
 
 import controller.{GameController, MenuController}
-import model.{Color, Playground, StringConstants}
+import model.{Color, GameConstants, Playground, StringConstants}
 
 import scala.io.StdIn
 import scala.util.control.Breaks._
@@ -28,14 +28,14 @@ class TUI {
     // Start new game
     val menuController = new MenuController((player1, player2))
     val gameController = menuController.startNewGame()
-    changeTurn(gameController)
+    startGame(gameController)
 
   }
 
   /**
-    * Starts new turn for the next player
+    * Starts new game
     */
-  def changeTurn(gameController: GameController): Unit = {
+  def startGame(gameController: GameController): Unit = {
     var isGameOver = false
     //game keeps running until there is a winner
     while (!isGameOver) {
@@ -167,8 +167,9 @@ class TUI {
     * Ask active player for setting a token
     */
   def setToken(gameController: GameController): (Int, Int) = {
+    val maxTokens = GameConstants.AMOUNT_TOKENS
     val position = getPositionInput(
-      StringConstants.SET_TOKEN,
+      StringConstants.SET_TOKEN + " (" + (maxTokens - gameController.getActivePlayer.unsetTokens.get() + 1) + "/" + maxTokens + ")",
       StringConstants.SET_TOKEN_WRONG_POSITION,
       gameController.isPositionFree,
       StringConstants.SET_TOKEN_NO_FREE_POSITION
