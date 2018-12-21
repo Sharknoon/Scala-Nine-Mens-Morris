@@ -1,13 +1,12 @@
 package controller
 
 import model.{Game, Player, Property, Token}
-import scalafx.beans.property.ObjectProperty
 
 class GameController(game: Game) {
 
-  private val activePlayer = new ObjectProperty[Player]() {
+  private val activePlayer = new Property[Player](
     value = game.players._1
-  }
+  )
 
   /**
     * Change the active player in case that the turn of the current player
@@ -25,7 +24,7 @@ class GameController(game: Game) {
     activePlayer.get()
   }
 
-  def activePlayerProperty: ObjectProperty[Player] = {
+  def activePlayerProperty: Property[Player] = {
     activePlayer
   }
 
