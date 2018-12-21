@@ -1,6 +1,6 @@
 package controller
 
-import model.{Game, Player, Token}
+import model.{Game, Player, Property, Token}
 import scalafx.beans.property.ObjectProperty
 
 class GameController(game: Game) {
@@ -81,7 +81,7 @@ class GameController(game: Game) {
     * In case that no token occupied on the field, the object in the object property is null
     */
   def isPositionFree(position: (Int, Int)): Boolean = {
-    val field: ObjectProperty[Token] = game.playground.fields(position)
+    val field: Property[Token] = game.playground.fields(position)
     field.get() == null
   }
 

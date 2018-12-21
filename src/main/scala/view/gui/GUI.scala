@@ -2,7 +2,7 @@ package view.gui
 
 import controller.{GameController, MenuController}
 import model.Color.Color
-import model.{Color, GameConstants, StringConstants, Token}
+import model._
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.beans.binding.Bindings
@@ -422,9 +422,9 @@ object GUI extends JFXApp {
     * @param group          The group in which the playground is located
     */
   private def bindTokens(gameController: GameController, group: Group): Unit = {
-    gameController.getGame.playground.fields.foreach((tuple: ((Int, Int), ObjectProperty[Token])) => {
+    gameController.getGame.playground.fields.foreach((tuple: ((Int, Int), Property[Token])) => {
       val tokenUI = new TokenUI()
-      tuple._2.onChange((_, _, newToken) =>
+      tuple._2.onChange((_, newToken) =>
         if (newToken == null) {
           tokenUI.activate(false)
         } else {
