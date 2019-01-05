@@ -2,18 +2,16 @@ package view.tui
 
 import controller.{GameController, MenuController}
 import model.{Color, GameConstants, Playground, StringConstants}
+import view.UI
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.StdIn
 import scala.util.Try
 import scala.util.control.Breaks._
 
-class TUI {
-
-  setStartMenuInput()
+class TUI extends UI {
 
   def setStartMenuInput(): Unit = {
-
     println(StringConstants.ASK_FOR_PLAYER_NAMES)
     println(StringConstants.PLAYER1)
     val player1 = scala.io.StdIn.readLine()
@@ -296,5 +294,9 @@ class TUI {
       gameController.jumpToken(currentPositionOption, _),
       StringConstants.JUMP_TOKEN_DESTINATION_FAIL
     )
+  }
+
+  override def start(): Unit = {
+    setStartMenuInput()
   }
 }

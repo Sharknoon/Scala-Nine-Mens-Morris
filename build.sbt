@@ -10,6 +10,9 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.0.0"
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
 
+libraryDependencies += "com.google.inject" % "guice" % "4.1.0"
+libraryDependencies += "net.codingwell" %% "scala-guice" % "4.1.0"
+
 // Add dependency on ScalaFX library
 libraryDependencies += "org.scalafx" %% "scalafx" % "11-R16"
 
