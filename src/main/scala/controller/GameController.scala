@@ -252,6 +252,7 @@ class GameController(game: Game) {
     false
   }
 
+
   /**
     * Checks if a player isn't able to move a token or he has only two tokens left
     *
