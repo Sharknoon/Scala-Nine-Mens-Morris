@@ -1,18 +1,35 @@
 package controller
 
+import actors.TurnCounter
+import akka.actor.{ActorSystem, Props}
+import akka.pattern.ask
+import akka.util.Timeout
 import model.{Game, Player, Property, Token}
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 class GameController(game: Game) {
+
+  val system = ActorSystem("GameSystem")
+  val turnCounterActor = system.actorOf(Props[TurnCounter], name = "turnCounterActor")
 
   private val activePlayer = new Property[Player](
     value = game.players._1
   )
+
+  def getGameTurns: Int = {
+    implicit val timeout: Timeout = 5 seconds
+    val future = turnCounterActor ? "get"
+    Await.result(future, Timeout(5 seconds).duration).asInstanceOf[Int]
+  }
 
   /**
     * Change the active player in case that the turn of the current player
     * is over
     */
   def changePlayer(): Player = {
+    turnCounterActor ! "incr"
     activePlayer.set(if (getActivePlayer == game.players._1) game.players._2 else game.players._1)
     getActivePlayer
   }

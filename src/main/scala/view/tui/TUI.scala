@@ -41,6 +41,7 @@ class TUI {
     var isGameOver = false
     //game keeps running until there is a winner
     while (!isGameOver) {
+      println("Gameturn Nr. " + gameController.getGameTurns)
       val activePlayer = gameController.getActivePlayer
       println(StringConstants.ACTIVE_PLAYER + activePlayer.name + " (" + activePlayer.color + ") " + StringConstants.ACTIVE_PLAYER_IS_ON_TURN)
 
