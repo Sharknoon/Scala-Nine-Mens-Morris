@@ -293,6 +293,11 @@ class GameController(game: Game) {
     true
   }
 
+  /**
+    * Returns the opponent player to the current player
+    *
+    * @return the other player
+    */
   def getOpponentPlayer: Player = {
     if (game.players._1 == getActivePlayer) {
       game.players._2
@@ -375,6 +380,11 @@ class GameController(game: Game) {
     true
   }
 
+  /**
+    * Checks if the active player has exactly 3 tokens so he is able to jump with his tokens
+    *
+    * @return true if the player has exactly 3 tokens
+    */
   def canJumpTokens: Boolean = {
     getActivePlayer.tokensInGame.get() == 3
   }
