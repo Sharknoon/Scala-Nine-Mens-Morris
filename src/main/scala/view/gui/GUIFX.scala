@@ -20,6 +20,11 @@ object GUIFX extends JFXApp {
 
   val sizeMultiplier = 100
 
+  //Main Borderpane with beige background
+  private val main = new BorderPane() {
+    style = "-fx-base: beige"
+  }
+
   //Sets the state with the title and a icon at a maximized state and the borderpane main
   stage = new JFXApp.PrimaryStage {
     title.value = StringConstants.TITLE
@@ -33,10 +38,7 @@ object GUIFX extends JFXApp {
   initStartMenu(main)
   val statusText = new StringProperty("Demo")
   val playerText = new StringProperty("Demo")
-  //Main Borderpane with beige background
-  private val main = new BorderPane() {
-    style = "-fx-base: beige"
-  }
+
   private val nextClickAction: ObjectProperty[((Int, Int)) => Unit] = new ObjectProperty[((Int, Int)) => Unit]()
 
   /**
